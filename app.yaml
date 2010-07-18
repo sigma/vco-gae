@@ -1,0 +1,8 @@
+application: vco-gae
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /vmware-vmo-webcontrol/.*
+  script: vco-server.py

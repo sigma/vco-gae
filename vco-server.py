@@ -1,0 +1,72 @@
+import sys
+from google.appengine.ext import webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
+import vco.VSOWebControlService_server
+from ZSI.schema import GED
+from ZSI.twisted.wsgi import SOAPApplication, soapmethod, SOAPHandlerChainFactory, WSGIApplication
+
+def _soapmethod(op):
+    op_request = GED("http://webservice.vso.dunes.ch", op).pyclass
+    op_response = GED("http://webservice.vso.dunes.ch", op + "Response").pyclass
+    return soapmethod(op_request.typecode, op_response.typecode,
+                      operation=op, soapaction=op)
+
+class VcoService(SOAPApplication):
+    factory = SOAPHandlerChainFactory
+    # wsdl_content = dict(name='Vco', targetNamespace='urn:echo',
+    #                     imports=(), portType='')
+
+    @_soapmethod('echo')
+    def soap_echo(self, request, response, **kw):
+        response._echoReturn = request._message
+        return request,response
+
+    @_soapmethod('echoWorkflow')
+    def soap_echoWorkflow(self, request, response, **kw):
+        response._echoWorkflowReturn = request._workflowMessage
+        return request,response
+
+    @_soapmethod('getWorkflowForId')
+    def soap_getWorkflowForId(self, request, response, **kw):
+        wf_id = request._workflowId
+        user = request._username
+        pwd = request._password
+
+        response._getWorkflowForIdReturn = None
+        return request, response
+
+    @_soapmethod('executeWorkflow')
+    def soap_executeWorkflow(self, request, response, **kw):
+        wf_id = request._workflowId
+        user = request._username
+        pwd = request._password
+        inputs = {}
+        for i in request._workflowInputs:
+            inputs[i._name] = (i._type, i._value)
+
+        response._executeWorkflowReturn = None
+        return request, response
+
+    @_soapmethod('simpleExecuteWorkflow')
+    def soap_simpleExecuteWorkflow(self, request, response, **kw):
+        wf_id = request._in0
+        user = request._in1
+        pwd = request._in2
+        inputs = {}
+
+        # unserializing of inputs. Probably this is very fragile
+        input = request._in3.split(',')
+        for (name, type, value) in zip(input[::3], input[1::3], input[2::3]):
+            inputs[name] = (type, value)
+
+        response._simpleExecuteWorkflowReturn = None
+        return request, response
+
+application = WSGIApplication()
+application['webservice'] = VcoService()
+
+def main():
+  run_wsgi_app(application)
+
+if __name__ == "__main__":
+  main()
