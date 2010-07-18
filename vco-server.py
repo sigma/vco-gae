@@ -62,6 +62,128 @@ class VcoService(SOAPApplication):
         response._simpleExecuteWorkflowReturn = None
         return request, response
 
+    @_soapmethod('cancelWorkflow')
+    def soap_cancelWorkflow(self, request, response, **kw):
+        tk_id = request._workflowTokenId
+        user = request._username
+        pwd = request._password
+
+        return request, response
+
+    @_soapmethod('answerWorkflowInput')
+    def soap_answerWorkflowInput(self, request, response, **kw):
+        tk_id = request._workflowTokenId
+        user = request._username
+        pwd = request._password
+        inputs = {}
+        for i in request._answerInputs:
+            inputs[i._name] = (i._type, i._value)
+
+        return request, response
+
+    @_soapmethod('getWorkflowTokenStatus')
+    def soap_getWorkflowTokenStatus(self, request, response, **kw):
+        tk_ids = request._workflowTokenIds
+        user = request._username
+        pwd = request._password
+
+        response._getWorkflowTokenStatusReturn = []
+        return request, response
+
+    @_soapmethod('getWorkflowTokenResult')
+    def soap_getWorkflowTokenResult(self, request, response, **kw):
+        tk_id = request._workflowTokenId
+        user = request._username
+        pwd = request._password
+
+        response._getWorkflowTokenResultReturn = None
+        return request, response
+
+    @_soapmethod('getWorkflowTokenForId')
+    def soap_getWorkflowTokenForId(self, request, response, **kw):
+        tk_id = request._workflowTokenId
+        user = request._username
+        pwd = request._password
+
+        response._getWorkflowTokenForIdReturn = None
+        return request, response
+
+    @_soapmethod('getAllPlugins')
+    def soap_getAllPlugins(self, request, response, **kw):
+        user = request._username
+        pwd = request._password
+
+        response._getAllPluginsReturn = []
+        return request, response
+
+    @_soapmethod('getAllWorkflows')
+    def soap_getAllWorkflows(self, request, response, **kw):
+        user = request._username
+        pwd = request._password
+
+        response._getAllWorkflowsReturn = []
+        return request, response
+
+    @_soapmethod('getWorkflowsWithName')
+    def soap_getWorkflowsWithName(self, request, response, **kw):
+        user = request._username
+        pwd = request._password
+
+        response._getWorkflowsWithNameReturn = []
+        return request, response
+
+    @_soapmethod('hasRights')
+    def soap_hasRights(self, request, response, **kw):
+        response.hasRightsReturn = False
+        return request, response
+
+    @_soapmethod('sendCustomEvent')
+    def soap_sendCustomEvent(self, request, response, **kw):
+        return request, response
+
+    @_soapmethod('findForId')
+    def soap_findForId(self, request, response, **kw):
+        type = request._type
+        id = request._id
+        user = request._username
+        pwd = request._password
+
+        response._findForIdReturn = None
+        return request, response
+
+    @_soapmethod('findRelation')
+    def soap_findRelation(self, request, response, **kw):
+        type = request._parentType
+        id = request._parentId
+        relation = request._relationName
+        user = request._username
+        pwd = request._password
+
+        response._findRelationReturn = []
+        return response
+
+    @_soapmethod('hasChildrenInRelation')
+    def soap_hasChildrenInRelation(self, request, response, **kw):
+        type = request._parentType
+        id = request._parentId
+        relation = request._relationName
+        user = request._username
+        pwd = request._password
+
+        response._hasChildrenRelationReturn = False
+        return request, response
+
+    @_soapmethod('find')
+    def soap_find(self, request, response, **kw):
+        type = request._parentType
+        id = request._parentId
+        relation = request._relationName
+        user = request._username
+        pwd = request._password
+
+        response._findReturn = []
+        return response
+
 application = WSGIApplication()
 application['webservice'] = VcoService()
 
