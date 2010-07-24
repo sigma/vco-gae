@@ -1,7 +1,7 @@
 import sys
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-import vco.VSOWebControlService_server
+import vco.generated.VSOWebControlService_server
 from ZSI.schema import GED
 from ZSI.twisted.wsgi import SOAPApplication, soapmethod, SOAPHandlerChainFactory, WSGIApplication
 
