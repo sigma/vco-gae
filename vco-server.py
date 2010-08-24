@@ -1,7 +1,11 @@
 import sys
+import logging
+
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+
 import vco.generated.VSOWebControlService_server
+
 from ZSI.schema import GED
 from ZSI.twisted.wsgi import SOAPApplication, soapmethod, SOAPHandlerChainFactory, WSGIApplication
 
@@ -18,12 +22,16 @@ class VcoService(SOAPApplication):
 
     @_soapmethod('echo')
     def soap_echo(self, request, response, **kw):
-        response._echoReturn = request._message
+        msg = request._message
+        logging.debug("[/] echo: %s" % (msg))
+        response._echoReturn = msg
         return request,response
 
     @_soapmethod('echoWorkflow')
     def soap_echoWorkflow(self, request, response, **kw):
-        response._echoWorkflowReturn = request._workflowMessage
+        msg = request._workflowMessage
+        logging.debug("[/] echo: %s" % (msg))
+        response._echoWorkflowReturn = msg
         return request,response
 
     @_soapmethod('getWorkflowForId')
@@ -31,6 +39,7 @@ class VcoService(SOAPApplication):
         wf_id = request._workflowId
         user = request._username
         pwd = request._password
+        logging.debug("[%s/%s] getWorkflowForId: %s" % (user, pwd, wf_id))
 
         response._getWorkflowForIdReturn = None
         return request, response
@@ -41,6 +50,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
         inputs = {}
+        logging.debug("[%s/%s] executeWorkflow: %s (%s)" % (user, pwd, wf_id, inputs))
         for i in request._workflowInputs:
             inputs[i._name] = (i._type, i._value)
 
@@ -53,6 +63,7 @@ class VcoService(SOAPApplication):
         user = request._in1
         pwd = request._in2
         inputs = {}
+        logging.debug("[%s/%s] simpleExecuteWorkflow: %s (%s)" % (user, pwd, wf_id, inputs))
 
         # unserializing of inputs. Probably this is very fragile
         input = request._in3.split(',')
@@ -67,7 +78,7 @@ class VcoService(SOAPApplication):
         tk_id = request._workflowTokenId
         user = request._username
         pwd = request._password
-
+        logging.debug("[%s/%s] cancelWorkflow: %s (%s)" % (user, pwd, wf_id))
         return request, response
 
     @_soapmethod('answerWorkflowInput')
@@ -128,6 +139,8 @@ class VcoService(SOAPApplication):
     def soap_getWorkflowsWithName(self, request, response, **kw):
         user = request._username
         pwd = request._password
+        workflowName = request._workflowName
+        logging.debug("[%s/%s] getWorkflowsWithName: %s" % (user, pwd, workflowName))
 
         response._getWorkflowsWithNameReturn = []
         return request, response
@@ -188,7 +201,8 @@ application = WSGIApplication()
 application['webservice'] = VcoService()
 
 def main():
-  run_wsgi_app(application)
+    logging.getLogger().setLevel(logging.DEBUG)
+    run_wsgi_app(application)
 
 if __name__ == "__main__":
-  main()
+    main()
