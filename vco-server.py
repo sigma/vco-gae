@@ -37,6 +37,20 @@ class VcoService(SOAPApplication):
         response._echoWorkflowReturn = msg
         return request,response
 
+    def __findWorkflow(self, wf_id=None, wf_name=None):
+        query = models.Workflow.all()
+        if wf_id is not None:
+            query.filter('id =', wf_id)
+            wf = query.get()
+            if wf is not None:
+                wf = convert.convertWorkflow(wf)
+            return wf
+        else:
+            if wf_name is not None:
+                query.filter('name =', wf_name)
+            wfs = [convert.convertWorkflow(wf) for wf in query]
+            return wfs
+
     @_soapmethod('getWorkflowForId')
     def soap_getWorkflowForId(self, request, response, **kw):
         wf_id = request._workflowId
@@ -44,9 +58,11 @@ class VcoService(SOAPApplication):
         pwd = request._password
         logging.debug("[%s/%s] getWorkflowForId: %s" % (user, pwd, wf_id))
 
-        response._getWorkflowForIdReturn = None
+        wf = self.__findWorkflow(wf_id=wf_id)
+        response._getWorkflowForIdReturn = wf
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('executeWorkflow')
     def soap_executeWorkflow(self, request, response, **kw):
         wf_id = request._workflowId
@@ -60,6 +76,7 @@ class VcoService(SOAPApplication):
         response._executeWorkflowReturn = None
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('simpleExecuteWorkflow')
     def soap_simpleExecuteWorkflow(self, request, response, **kw):
         wf_id = request._in0
@@ -76,6 +93,7 @@ class VcoService(SOAPApplication):
         response._simpleExecuteWorkflowReturn = None
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('cancelWorkflow')
     def soap_cancelWorkflow(self, request, response, **kw):
         tk_id = request._workflowTokenId
@@ -84,6 +102,7 @@ class VcoService(SOAPApplication):
         logging.debug("[%s/%s] cancelWorkflow: %s (%s)" % (user, pwd, wf_id))
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('answerWorkflowInput')
     def soap_answerWorkflowInput(self, request, response, **kw):
         tk_id = request._workflowTokenId
@@ -95,6 +114,7 @@ class VcoService(SOAPApplication):
 
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('getWorkflowTokenStatus')
     def soap_getWorkflowTokenStatus(self, request, response, **kw):
         tk_ids = request._workflowTokenIds
@@ -104,6 +124,7 @@ class VcoService(SOAPApplication):
         response._getWorkflowTokenStatusReturn = []
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('getWorkflowTokenResult')
     def soap_getWorkflowTokenResult(self, request, response, **kw):
         tk_id = request._workflowTokenId
@@ -113,6 +134,7 @@ class VcoService(SOAPApplication):
         response._getWorkflowTokenResultReturn = None
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('getWorkflowTokenForId')
     def soap_getWorkflowTokenForId(self, request, response, **kw):
         tk_id = request._workflowTokenId
@@ -136,8 +158,8 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        response._getAllWorkflowsReturn = [convert.convertWorkflow(w)
-                                           for w in list(models.Workflow.all())]
+        wfs = self.__findWorkflow()
+        response._getAllWorkflowsReturn = wfs
         return request, response
 
     @_soapmethod('getWorkflowsWithName')
@@ -147,18 +169,22 @@ class VcoService(SOAPApplication):
         workflowName = request._workflowName
         logging.debug("[%s/%s] getWorkflowsWithName: %s" % (user, pwd, workflowName))
 
-        response._getWorkflowsWithNameReturn = []
+        wfs = self.__findWorkflow(wf_name=workflowName)
+        response._getWorkflowsWithNameReturn = wfs
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('hasRights')
     def soap_hasRights(self, request, response, **kw):
         response.hasRightsReturn = False
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('sendCustomEvent')
     def soap_sendCustomEvent(self, request, response, **kw):
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('findForId')
     def soap_findForId(self, request, response, **kw):
         type = request._type
@@ -169,6 +195,7 @@ class VcoService(SOAPApplication):
         response._findForIdReturn = None
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('findRelation')
     def soap_findRelation(self, request, response, **kw):
         type = request._parentType
@@ -180,6 +207,7 @@ class VcoService(SOAPApplication):
         response._findRelationReturn = []
         return response
 
+    # TODO: complete implem
     @_soapmethod('hasChildrenInRelation')
     def soap_hasChildrenInRelation(self, request, response, **kw):
         type = request._parentType
@@ -191,6 +219,7 @@ class VcoService(SOAPApplication):
         response._hasChildrenRelationReturn = False
         return request, response
 
+    # TODO: complete implem
     @_soapmethod('find')
     def soap_find(self, request, response, **kw):
         type = request._parentType
