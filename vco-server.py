@@ -5,8 +5,9 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 import vco.generated.VSOWebControlService_server
-from vco.types import *
-from vco.models import Plugin
+import vco.types as types
+import vco.models as models
+import vco.convert as convert
 
 from ZSI.schema import GED
 from ZSI.twisted.wsgi import SOAPApplication, soapmethod, SOAPHandlerChainFactory, WSGIApplication
@@ -126,16 +127,8 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        def _convertPlugin(plug):
-            p = ModuleInfo()
-            p._moduleName = plug.name
-            p._moduleVersion = plug.version
-            p._moduleDisplayName = plug.display
-            p._moduleDescription = plug.description
-            return p
-
-        response._getAllPluginsReturn = [_convertPlugin(p)
-                                         for p in list(Plugin.all())]
+        response._getAllPluginsReturn = [convert.convertPlugin(p)
+                                         for p in list(models.Plugin.all())]
         return request, response
 
     @_soapmethod('getAllWorkflows')
@@ -143,7 +136,8 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        response._getAllWorkflowsReturn = []
+        response._getAllWorkflowsReturn = [convert.convertWorkflow(w)
+                                           for w in list(models.Workflow.all())]
         return request, response
 
     @_soapmethod('getWorkflowsWithName')
