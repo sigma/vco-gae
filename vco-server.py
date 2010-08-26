@@ -74,8 +74,8 @@ class VcoService(SOAPApplication):
         token = models.WorkflowToken(id=str(_uuid()),
                                      wf=wf.key(),
                                      start=datetime.now())
-        wf = getWorkflowImplementation(wf_id)
-        wf.initToken(token)
+        wf = getWorkflowImplementation(wf.wf_implem)
+        wf.initTokens(token, inputs)
         token.put()
         return convert.convertWorkflowToken(token)
 

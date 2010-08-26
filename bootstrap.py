@@ -28,5 +28,6 @@ wf = Workflow(id=str(_uuid()),
               description="this workflow just does nothing",
               input = [i.key()],
               output = [o.key()],
-              attributes=[])
+              attributes=[],
+              wf_implem="simple.sleep")
 wf.put()

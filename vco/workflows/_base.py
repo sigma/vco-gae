@@ -5,5 +5,5 @@ class WorkflowImplementationBase(object):
     def __init__(self):
         pass
 
-    def initToken(self, token):
+    def initTokens(self, token, inputs):
         pass
