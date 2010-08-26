@@ -1,7 +1,9 @@
+from vco.models import WorkflowToken
+
 class WorkflowImplementationBase(object):
 
-    def __init__(self, token):
-        self._token = token
+    def __init__(self):
+        pass
 
-    def update(self):
+    def initToken(self, token):
         pass

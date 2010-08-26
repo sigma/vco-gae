@@ -1,6 +1,9 @@
+from uuid import uuid1 as _uuid
 import sys
 import logging
+from datetime import datetime
 
+from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
@@ -8,6 +11,7 @@ import vco.generated.VSOWebControlService_server
 import vco.types as types
 import vco.models as models
 import vco.convert as convert
+from vco.workflows import getWorkflowImplementation
 
 from ZSI.schema import GED
 from ZSI.twisted.wsgi import SOAPApplication, soapmethod, SOAPHandlerChainFactory, WSGIApplication
@@ -62,7 +66,19 @@ class VcoService(SOAPApplication):
         response._getWorkflowForIdReturn = wf
         return request, response
 
-    # TODO: complete implem
+    def __executeWorkflow(self, wf_id, inputs):
+        query = models.Workflow.all()
+        query.filter('id =', wf_id)
+        wf = query.get()
+
+        token = models.WorkflowToken(id=str(_uuid()),
+                                     wf=wf.key(),
+                                     start=datetime.now())
+        wf = getWorkflowImplementation(wf_id)
+        wf.initToken(token)
+        token.put()
+        return convert.convertWorkflowToken(token)
+
     @_soapmethod('executeWorkflow')
     def soap_executeWorkflow(self, request, response, **kw):
         wf_id = request._workflowId
@@ -73,10 +89,9 @@ class VcoService(SOAPApplication):
         for i in request._workflowInputs:
             inputs[i._name] = (i._type, i._value)
 
-        response._executeWorkflowReturn = None
+        response._executeWorkflowReturn = self.__executeWorkflow(wf_id, inputs)
         return request, response
 
-    # TODO: complete implem
     @_soapmethod('simpleExecuteWorkflow')
     def soap_simpleExecuteWorkflow(self, request, response, **kw):
         wf_id = request._in0
@@ -90,7 +105,7 @@ class VcoService(SOAPApplication):
         for (name, type, value) in zip(input[::3], input[1::3], input[2::3]):
             inputs[name] = (type, value)
 
-        response._simpleExecuteWorkflowReturn = None
+        response._simpleExecuteWorkflowReturn = self.__executeWorkflow(wf_id, inputs)
         return request, response
 
     # TODO: complete implem

@@ -22,7 +22,10 @@ class Workflow(db.Model):
 
     wf_implem = db.StringProperty()
 
-class WorkflowToken(db.Expando):
+class TimedItem(db.Model):
+    p_time_limit = db.DateTimeProperty()
+
+class WorkflowToken(TimedItem):
     id = db.StringProperty()
     title = db.StringProperty()
     wf = db.Key()
@@ -31,7 +34,7 @@ class WorkflowToken(db.Expando):
     cur_state = db.StringProperty()
     global_state = db.StringProperty()
 
-    start = db.StringProperty()
-    end = db.StringProperty()
+    start = db.DateTimeProperty()
+    end = db.DateTimeProperty()
 
     xml = db.StringProperty()
