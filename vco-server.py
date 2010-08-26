@@ -37,7 +37,7 @@ class VcoService(SOAPApplication):
         response._echoWorkflowReturn = msg
         return request,response
 
-    def __findWorkflow(self, wf_id=None, wf_name=None):
+    def __findWorkflows(self, wf_id=None, wf_name=None):
         query = models.Workflow.all()
         if wf_id is not None:
             query.filter('id =', wf_id)
@@ -58,7 +58,7 @@ class VcoService(SOAPApplication):
         pwd = request._password
         logging.debug("[%s/%s] getWorkflowForId: %s" % (user, pwd, wf_id))
 
-        wf = self.__findWorkflow(wf_id=wf_id)
+        wf = self.__findWorkflows(wf_id=wf_id)
         response._getWorkflowForIdReturn = wf
         return request, response
 
@@ -158,7 +158,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        wfs = self.__findWorkflow()
+        wfs = self.__findWorkflows()
         response._getAllWorkflowsReturn = wfs
         return request, response
 
@@ -169,7 +169,7 @@ class VcoService(SOAPApplication):
         workflowName = request._workflowName
         logging.debug("[%s/%s] getWorkflowsWithName: %s" % (user, pwd, workflowName))
 
-        wfs = self.__findWorkflow(wf_name=workflowName)
+        wfs = self.__findWorkflows(wf_name=workflowName)
         response._getWorkflowsWithNameReturn = wfs
         return request, response
 

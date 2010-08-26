@@ -1,5 +1,4 @@
 from google.appengine.ext import db
-from google.appengine.api.datastore_errors import BadQueryError
 
 class Plugin(db.Model):
 
@@ -20,3 +19,19 @@ class Workflow(db.Model):
     input = db.ListProperty(db.Key)
     output = db.ListProperty(db.Key)
     attributes = db.ListProperty(db.Key)
+
+    wf_implem = db.StringProperty()
+
+class WorkflowToken(db.Expando):
+    id = db.StringProperty()
+    title = db.StringProperty()
+    wf = db.Key()
+
+    cur_name = db.StringProperty()
+    cur_state = db.StringProperty()
+    global_state = db.StringProperty()
+
+    start = db.StringProperty()
+    end = db.StringProperty()
+
+    xml = db.StringProperty()
