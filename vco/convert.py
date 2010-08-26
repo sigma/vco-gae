@@ -1,3 +1,4 @@
+import logging
 from types import *
 from google.appengine.ext import db
 
@@ -36,10 +37,10 @@ def convertWorkflowToken(tok):
     t = WorkflowToken()
     t._id = tok.id
     t._title = tok.title
-    t._workflowId = db.get(tok.wf).id
+    t._workflowId = tok.wf.id
     t._currentItemName = tok.cur_name
     t._currentItemState = tok.cur_state
-    t._globalState = tok.global_state
+    t._globalState = tok.state
     t._startDate = "%s" % (tok.start)
     t._endDate = "%s" % (tok.end)
     t._xmlContent = tok.xml

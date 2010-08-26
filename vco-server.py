@@ -70,13 +70,14 @@ class VcoService(SOAPApplication):
         query = models.Workflow.all()
         query.filter('id =', wf_id)
         wf = query.get()
-
         token = models.WorkflowToken(id=str(_uuid()),
-                                     wf=wf.key(),
-                                     start=datetime.now())
+                                     wf=wf,
+                                     start=datetime.now(),
+                                     state="running")
+
         wf = getWorkflowImplementation(wf.wf_implem)
-        wf.initTokens(token, inputs)
         token.put()
+        wf.initTokens(token, inputs)
         return convert.convertWorkflowToken(token)
 
     @_soapmethod('executeWorkflow')
@@ -129,14 +130,15 @@ class VcoService(SOAPApplication):
 
         return request, response
 
-    # TODO: complete implem
     @_soapmethod('getWorkflowTokenStatus')
     def soap_getWorkflowTokenStatus(self, request, response, **kw):
         tk_ids = request._workflowTokenIds
         user = request._username
         pwd = request._password
 
-        response._getWorkflowTokenStatusReturn = []
+        tks = [models.WorkflowToken.getCurrentItem(tk_id) for tk_id in tk_ids]
+
+        response._getWorkflowTokenStatusReturn = [tk.state for tk in tks]
         return request, response
 
     # TODO: complete implem
@@ -149,14 +151,14 @@ class VcoService(SOAPApplication):
         response._getWorkflowTokenResultReturn = None
         return request, response
 
-    # TODO: complete implem
     @_soapmethod('getWorkflowTokenForId')
     def soap_getWorkflowTokenForId(self, request, response, **kw):
         tk_id = request._workflowTokenId
         user = request._username
         pwd = request._password
 
-        response._getWorkflowTokenForIdReturn = None
+        tk = models.WorkflowToken.getCurrentItem(tk_id)
+        response._getWorkflowTokenForIdReturn = convert.convertWorkflowToken(tk)
         return request, response
 
     @_soapmethod('getAllPlugins')
