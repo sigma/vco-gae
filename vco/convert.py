@@ -54,6 +54,6 @@ def convertWorkflowTokenResult(tok):
         out = db.get(out)
         attr._name = out.name
         attr._type = out.type
-        attr._value = tok.p_results[idx]
+        attr._value = tok.__getattr__("res_%s" % (attr._name))
         res.append(attr)
     return res

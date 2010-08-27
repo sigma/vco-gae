@@ -2,13 +2,19 @@ from google.appengine.ext import db
 from datetime import datetime
 import logging
 
-class BaseModel(db.Model):
+class Clonable(object):
 
     def clone(self, **args):
         klass = self.__class__
         props = dict((k, v.__get__(self, klass)) for k, v in klass.properties().iteritems())
         props.update(args)
         return klass(**props)
+
+class BaseModel(db.Model, Clonable):
+    pass
+
+class BaseExpando(db.Expando, Clonable):
+    pass
 
 class Plugin(BaseModel):
 
@@ -32,7 +38,7 @@ class Workflow(BaseModel):
 
     wf_implem = db.StringProperty(required=True)
 
-class TimedItem(BaseModel):
+class TimedItem(BaseExpando):
     p_time_limit = db.DateTimeProperty(default=datetime.max)
     id = db.StringProperty(required=True)
 
@@ -87,15 +93,28 @@ class WorkflowToken(TimedItem):
     p_results = db.StringListProperty()
 
     def setResults(self, res):
-        logging.debug("Setting results to '%s'" % (res))
+        self.clearResults()
         l = []
         for out in self.wf.output:
             out = db.get(out)
             name = out.name
-            logging.debug("Setting result for '%s'" % (name))
-            l.append(res.get(name))
-        logging.debug("Results are '%s'" % (l))
+            pname = "res_%s" % (name)
+            self.__setattr__(pname, res.get(name))
+            l.append(pname)
         self.p_results = l
+
+    def clearResults(self):
+        for pname in self.p_results:
+            self.__delattr__(pname)
+        self.p_results = []
+
+    def getResults(self):
+        res = {}
+        for pname in self.p_results:
+            val = getattr(self, pname)
+            key = pname[4:]
+            res[key] = val
+        return res
 
     def complete(self):
         self.state = "completed"
@@ -104,5 +123,5 @@ class WorkflowToken(TimedItem):
     def cancel(self):
         self.state = "canceled"
         self.end = datetime.now()
-        self.p_results = []
+        self.clearResults()
         self.setFinal()
