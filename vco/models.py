@@ -7,7 +7,11 @@ class Clonable(object):
     def clone(self, **args):
         klass = self.__class__
         props = dict((k, v.__get__(self, klass)) for k, v in klass.properties().iteritems())
+        if isinstance(self, db.Expando):
+            for k in self.dynamic_properties():
+                props[k] = self.__getattr__(k)
         props.update(args)
+        logging.debug(">>> %s" % (klass.properties()))
         return klass(**props)
 
 class BaseModel(db.Model, Clonable):
@@ -39,21 +43,32 @@ class Workflow(BaseModel):
     wf_implem = db.StringProperty(required=True)
 
 class TimedItem(BaseExpando):
-    p_time_limit = db.DateTimeProperty(default=datetime.max)
+    p_time_upper_limit = db.DateTimeProperty(default=datetime.max)
+    p_time_lower_limit = db.DateTimeProperty(default=datetime(1900, 1, 1))
+    p_time_range = db.ListProperty(datetime)
+
     id = db.StringProperty(required=True)
 
+    def setUpperLimit(self, date):
+        self.p_time_upper_limit = date
+        self.p_time_range = [self.p_time_lower_limit, date]
+
+    def setLowerLimit(self, date):
+        self.p_time_lower_limit = date
+        self.p_time_range = [date, self.p_time_upper_limit]
+
     def invalidateAfter(self, date):
-        self.p_time_limit = date
+        self.setUpperLimit(date)
 
     def setFinal(self):
-        self.p_time_limit = datetime.max
+        self.setUpperLimit(datetime.max)
 
     @classmethod
     def allValid(cls):
         now = datetime.now()
         query = cls.all()
-        query.filter('p_time_limit >=', now)
-        query.order('p_time_limit')
+        query.filter('p_time_range >=', now)
+        query.filter('p_time_range <=', now)
         return query
 
     @classmethod
@@ -65,16 +80,17 @@ class TimedItem(BaseExpando):
 
     @classmethod
     def delFutureItems(cls, id):
+        now = datetime.now()
         query = cls.all()
         query.filter('id =', id)
-        query.filter('p_time_limit =', datetime.max)
+        query.filter('p_time_upper_limit >=', now)
         db.delete(query)
 
     @classmethod
     def allExpired(cls):
         now = datetime.now()
         query = cls.all()
-        query.filter('p_time_limit <', now)
+        query.filter('p_time_upper_limit <', now)
         return query
 
 class WorkflowToken(TimedItem):

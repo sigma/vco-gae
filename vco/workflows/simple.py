@@ -13,6 +13,7 @@ class Sleep(WorkflowImplementationBase):
         end_token = token.clone(end=end)
         end_token.complete()
         end_token.setResults({'out': inputs['in'][1]})
+        end_token.setLowerLimit(end)
 
         token.invalidateAfter(end)
 

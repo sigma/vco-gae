@@ -1,6 +1,6 @@
 # Run this in admin console to populate the datastore
 
-from vco.models import Plugin, Workflow, Parameter
+from vco.models import Plugin, Workflow, Parameter, WorkflowToken
 from uuid import uuid1 as _uuid
 
 from google.appengine.ext import db
