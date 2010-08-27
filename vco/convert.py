@@ -45,3 +45,15 @@ def convertWorkflowToken(tok):
     t._endDate = "%s" % (tok.end)
     t._xmlContent = tok.xml
     return t
+
+def convertWorkflowTokenResult(tok):
+    res = []
+    outputs = tok.wf.output
+    for out, idx in zip(outputs, range(len(outputs))):
+        attr = WorkflowTokenAttribute()
+        out = db.get(out)
+        attr._name = out.name
+        attr._type = out.type
+        attr._value = tok.p_results[idx]
+        res.append(attr)
+    return res

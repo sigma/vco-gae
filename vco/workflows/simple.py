@@ -1,6 +1,5 @@
 from _base import WorkflowImplementationBase
 from datetime import timedelta, datetime
-from vco.models import clone_entity
 from google.appengine.ext import db
 
 class Sleep(WorkflowImplementationBase):
@@ -10,7 +9,11 @@ class Sleep(WorkflowImplementationBase):
 
     def initTokens(self, token, inputs):
         end = datetime.now()+self._delay
-        end_token = clone_entity(token, state="completed",
-                                 end=end)
-        token.p_time_limit = end
+
+        end_token = token.clone(end=end)
+        end_token.complete()
+        end_token.setResults({'out': inputs['in'][1]})
+
+        token.invalidateAfter(end)
+
         db.put([token,end_token])

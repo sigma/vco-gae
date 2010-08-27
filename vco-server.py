@@ -71,9 +71,7 @@ class VcoService(SOAPApplication):
         query.filter('id =', wf_id)
         wf = query.get()
         token = models.WorkflowToken(id=str(_uuid()),
-                                     wf=wf,
-                                     start=datetime.now(),
-                                     state="running")
+                                     wf=wf)
 
         wf = getWorkflowImplementation(wf.wf_implem)
         token.put()
@@ -109,13 +107,18 @@ class VcoService(SOAPApplication):
         response._simpleExecuteWorkflowReturn = self.__executeWorkflow(wf_id, inputs)
         return request, response
 
-    # TODO: complete implem
     @_soapmethod('cancelWorkflow')
     def soap_cancelWorkflow(self, request, response, **kw):
         tk_id = request._workflowTokenId
         user = request._username
         pwd = request._password
-        logging.debug("[%s/%s] cancelWorkflow: %s (%s)" % (user, pwd, wf_id))
+        logging.debug("[%s/%s] cancelWorkflow: %s" % (user, pwd, tk_id))
+
+        tk = models.WorkflowToken.getItem(tk_id).clone()
+        models.WorkflowToken.delFutureItems(tk_id)
+        tk.cancel()
+        tk.put()
+
         return request, response
 
     # TODO: complete implem
@@ -136,19 +139,19 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        tks = [models.WorkflowToken.getCurrentItem(tk_id) for tk_id in tk_ids]
+        tks = [models.WorkflowToken.getItem(tk_id) for tk_id in tk_ids]
 
         response._getWorkflowTokenStatusReturn = [tk.state for tk in tks]
         return request, response
 
-    # TODO: complete implem
     @_soapmethod('getWorkflowTokenResult')
     def soap_getWorkflowTokenResult(self, request, response, **kw):
         tk_id = request._workflowTokenId
         user = request._username
         pwd = request._password
 
-        response._getWorkflowTokenResultReturn = None
+        tk = models.WorkflowToken.getItem(tk_id)
+        response._getWorkflowTokenResultReturn = convert.convertWorkflowTokenResult(tk)
         return request, response
 
     @_soapmethod('getWorkflowTokenForId')
@@ -157,7 +160,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        tk = models.WorkflowToken.getCurrentItem(tk_id)
+        tk = models.WorkflowToken.getItem(tk_id)
         response._getWorkflowTokenForIdReturn = convert.convertWorkflowToken(tk)
         return request, response
 

@@ -12,6 +12,7 @@ def _cleanup(kind):
 _cleanup(Plugin)
 _cleanup(Parameter)
 _cleanup(Workflow)
+_cleanup(WorkflowToken)
 
 # Create plug-ins
 p = Plugin(name="dummy", version="0.1",
