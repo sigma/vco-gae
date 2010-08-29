@@ -45,17 +45,14 @@ class Workflow(BaseModel):
 class TimedItem(BaseExpando):
     p_time_upper_limit = db.DateTimeProperty(default=datetime.max)
     p_time_lower_limit = db.DateTimeProperty(default=datetime(1900, 1, 1))
-    p_time_range = db.ListProperty(datetime)
 
     id = db.StringProperty(required=True)
 
     def setUpperLimit(self, date):
         self.p_time_upper_limit = date
-        self.p_time_range = [self.p_time_lower_limit, date]
 
     def setLowerLimit(self, date):
         self.p_time_lower_limit = date
-        self.p_time_range = [date, self.p_time_upper_limit]
 
     def invalidateAfter(self, date):
         self.setUpperLimit(date)
@@ -63,12 +60,30 @@ class TimedItem(BaseExpando):
     def setFinal(self):
         self.setUpperLimit(datetime.max)
 
+    def split(self, *dates):
+        res = [self]
+        current = self
+        for d in dates:
+            n = current.clone(p_time_lower_limit = d)
+            current.p_time_upper_limit = d
+            res.append(n)
+            current = n
+        return res
+
+    def merge(self):
+        query = self.__class__.all()
+        query.filter('id =', self.id)
+        query.filter('__key__ !=', self.key())
+        db.delete(query)
+        self.setFinal()
+        return self
+
     @classmethod
     def allValid(cls):
         now = datetime.now()
         query = cls.all()
-        query.filter('p_time_range >=', now)
-        query.filter('p_time_range <=', now)
+        query.filter('p_time_upper_limit >=', now)
+        query.order('p_time_upper_limit')
         return query
 
     @classmethod
@@ -79,14 +94,6 @@ class TimedItem(BaseExpando):
         return query.get()
 
     @classmethod
-    def delFutureItems(cls, id):
-        now = datetime.now()
-        query = cls.all()
-        query.filter('id =', id)
-        query.filter('p_time_upper_limit >=', now)
-        db.delete(query)
-
-    @classmethod
     def allExpired(cls):
         now = datetime.now()
         query = cls.all()
@@ -94,6 +101,9 @@ class TimedItem(BaseExpando):
         return query
 
 class WorkflowToken(TimedItem):
+    _COMPLETED = "completed"
+    _CANCELLED = "canceled"
+
     title = db.StringProperty()
     wf = db.ReferenceProperty(required=True)
 
@@ -132,12 +142,21 @@ class WorkflowToken(TimedItem):
             res[key] = val
         return res
 
-    def complete(self):
-        self.state = "completed"
+    def setCompleted(self):
+        self.state = self._COMPLETED
         self.setFinal()
+        return self
 
-    def cancel(self):
-        self.state = "canceled"
+    def complete(self):
+        return self.setCompleted()
+
+    def setCancelled(self):
+        self.state = self._CANCELLED
         self.end = datetime.now()
         self.clearResults()
         self.setFinal()
+        return self
+
+    def cancel(self):
+        self.merge()
+        return self.setCancelled()

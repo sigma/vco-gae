@@ -8,13 +8,11 @@ class Sleep(WorkflowImplementationBase):
         self._delay = timedelta(seconds=10)
 
     def initTokens(self, token, inputs):
-        end = datetime.now()+self._delay
+        end = datetime.now() + self._delay
 
-        end_token = token.clone(end=end)
-        end_token.complete()
-        end_token.setResults({'out': inputs['in'][1]})
-        end_token.setLowerLimit(end)
+        running, completed = token.split(end)
 
-        token.invalidateAfter(end)
+        completed.setCompleted()
+        completed.setResults({'out': inputs['in'][1]})
 
-        db.put([token,end_token])
+        db.put([running,completed])

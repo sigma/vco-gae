@@ -117,10 +117,8 @@ class VcoService(SOAPApplication):
         pwd = request._password
         logging.debug("[%s/%s] cancelWorkflow: %s" % (user, pwd, tk_id))
 
-        tk = models.WorkflowToken.getItem(tk_id).clone()
-        models.WorkflowToken.delFutureItems(tk_id)
-        tk.cancel()
-        tk.put()
+        tk = models.WorkflowToken.getItem(tk_id)
+        tk.cancel().put()
 
         return request, response
 
