@@ -49,11 +49,12 @@ def convertWorkflowToken(tok):
 def convertWorkflowTokenResult(tok):
     res = []
     outputs = tok.wf.output
+    results = tok.getResults()
     for out, idx in zip(outputs, range(len(outputs))):
         attr = WorkflowTokenAttribute()
         out = db.get(out)
         attr._name = out.name
         attr._type = out.type
-        attr._value = tok.__getattr__("res_%s" % (attr._name))
+        attr._value = results.get(attr._name, "")
         res.append(attr)
     return res

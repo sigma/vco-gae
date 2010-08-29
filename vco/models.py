@@ -103,13 +103,14 @@ class TimedItem(BaseExpando):
 class WorkflowToken(TimedItem):
     _COMPLETED = "completed"
     _CANCELLED = "canceled"
+    _RUNNING = "running"
 
     title = db.StringProperty()
     wf = db.ReferenceProperty(required=True)
 
     cur_name = db.StringProperty()
     cur_state = db.StringProperty()
-    state = db.StringProperty(default="running")
+    state = db.StringProperty(default=_RUNNING)
 
     start = db.DateTimeProperty(auto_now_add=True)
     end = db.DateTimeProperty()
@@ -158,5 +159,8 @@ class WorkflowToken(TimedItem):
         return self
 
     def cancel(self):
-        self.merge()
-        return self.setCancelled()
+        if self.state == self._RUNNING:
+            self.merge()
+            return self.setCancelled()
+        else:
+            return self
