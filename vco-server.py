@@ -1,5 +1,7 @@
-from uuid import uuid1 as _uuid
 import sys
+sys.path.insert(0, 'ZSI.zip')
+
+from uuid import uuid1 as _uuid
 import logging
 from datetime import datetime
 
