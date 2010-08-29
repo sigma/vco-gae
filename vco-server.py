@@ -133,9 +133,7 @@ class VcoService(SOAPApplication):
 
         token = models.WorkflowToken.getItem(tk_id)
         if token.state == models.WorkflowToken._WAITING:
-            query = models.Workflow.all()
-            query.filter('id =', wf_id)
-            wf = query.get()
+            wf = token.wf
 
             wf = getWorkflowImplementation(wf.wf_implem)
             wf.updateTokens(token, inputs)
