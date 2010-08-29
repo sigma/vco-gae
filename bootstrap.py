@@ -16,14 +16,14 @@ _cleanup(WorkflowToken)
 
 # Create plug-ins
 p = Plugin(name="dummy", version="0.1",
-           description="Dummy plug-in", display="Dummy")
-p.put()
+           description="Dummy plug-in", display="Dummy !")
+db.put(p)
 
 # Create workflows
 i = Parameter(name="in", type="string")
-i.put()
 o = Parameter(name="out", type="string")
-o.put()
+db.put([i,o])
+
 wf = Workflow(id=str(_uuid()),
               name="Dummy workflow",
               description="this workflow just does nothing",
@@ -31,4 +31,4 @@ wf = Workflow(id=str(_uuid()),
               output = [o.key()],
               attributes=[],
               wf_implem="simple.sleep")
-wf.put()
+db.put(wf)
