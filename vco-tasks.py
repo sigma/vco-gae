@@ -13,7 +13,7 @@ class TimedItemConsolidate(webapp.RequestHandler):
         consolidated_classes = [WorkflowToken,]
 
         for cls in consolidated_classes:
-            query = cls.allExpired()
+            query = cls.allExpired(keys_only=True)
             nb = query.count()
             self.response.out.write("Consolidated %d items of class '%s'" % (nb, cls))
             db.delete(query)
@@ -23,7 +23,7 @@ class WorkflowTokenPurge(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'text/plain'
         limit = datetime.now() + timedelta(hours=-2)
 
-        query = WorkflowToken.allFinal()
+        query = WorkflowToken.allFinal(keys_only=True)
         query.filter('end <', limit)
         nb = query.count()
         self.response.out.write("Purged %d workflow tokens" % (nb))

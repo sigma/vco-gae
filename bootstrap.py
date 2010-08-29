@@ -7,7 +7,7 @@ from google.appengine.ext import db
 
 # Cleanup everything
 def _cleanup(kind):
-    db.delete(kind.all())
+    db.delete(kind.all(keys_only=True))
 
 _cleanup(Plugin)
 _cleanup(Parameter)

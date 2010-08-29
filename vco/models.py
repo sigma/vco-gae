@@ -78,17 +78,24 @@ class TimedItem(BaseExpando):
         return self
 
     @classmethod
-    def allValid(cls):
+    def allValid(cls, keys_only=False):
         now = datetime.now()
-        query = cls.all()
+        query = cls.all(keys_only=keys_only)
         query.filter('p_time_upper_limit >=', now)
         query.order('p_time_upper_limit')
         return query
 
     @classmethod
-    def allFinal(cls):
-        query = cls.all()
+    def allFinal(cls, keys_only=False):
+        query = cls.all(keys_only=keys_only)
         query.filter('p_time_upper_limit =', datetime.max)
+        return query
+
+    @classmethod
+    def allExpired(cls, keys_only=False):
+        now = datetime.now(keys_only=keys_only)
+        query = cls.all()
+        query.filter('p_time_upper_limit <', now)
         return query
 
     @classmethod
@@ -97,13 +104,6 @@ class TimedItem(BaseExpando):
         query = cls.allValid()
         query.filter('id =', id)
         return query.get()
-
-    @classmethod
-    def allExpired(cls):
-        now = datetime.now()
-        query = cls.all()
-        query.filter('p_time_upper_limit <', now)
-        return query
 
 class WorkflowToken(TimedItem):
     _COMPLETED = "completed"
