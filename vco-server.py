@@ -1,4 +1,5 @@
 import sys
+sys.path.insert(0, 'zope.zip')
 sys.path.insert(0, 'ZSI.zip')
 
 from uuid import uuid1 as _uuid
