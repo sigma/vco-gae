@@ -93,8 +93,8 @@ class TimedItem(BaseExpando):
 
     @classmethod
     def allExpired(cls, keys_only=False):
-        now = datetime.now(keys_only=keys_only)
-        query = cls.all()
+        now = datetime.now()
+        query = cls.all(keys_only=keys_only)
         query.filter('p_time_upper_limit <', now)
         return query
 
