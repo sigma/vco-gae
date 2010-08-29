@@ -122,7 +122,6 @@ class VcoService(SOAPApplication):
 
         return request, response
 
-    # TODO: complete implem
     @_soapmethod('answerWorkflowInput')
     def soap_answerWorkflowInput(self, request, response, **kw):
         tk_id = request._workflowTokenId
@@ -131,6 +130,15 @@ class VcoService(SOAPApplication):
         inputs = {}
         for i in request._answerInputs:
             inputs[i._name] = (i._type, i._value)
+
+        token = models.WorkflowToken.getItem(tk_id)
+        if token.state == models.WorkflowToken._WAITING:
+            query = models.Workflow.all()
+            query.filter('id =', wf_id)
+            wf = query.get()
+
+            wf = getWorkflowImplementation(wf.wf_implem)
+            wf.updateTokens(token, inputs)
 
         return request, response
 

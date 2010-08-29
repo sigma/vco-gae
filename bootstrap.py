@@ -24,11 +24,20 @@ i = Parameter(name="in", type="string")
 o = Parameter(name="out", type="string")
 db.put([i,o])
 
-wf = Workflow(id=str(_uuid()),
-              name="Dummy workflow",
-              description="this workflow just does nothing",
-              input = [i.key()],
-              output = [o.key()],
-              attributes=[],
-              wf_implem="simple.sleep")
-db.put(wf)
+wf1 = Workflow(id=str(_uuid()),
+               name="Dummy workflow",
+               description="this workflow just does nothing",
+               input = [i.key()],
+               output = [o.key()],
+               attributes=[],
+               wf_implem="simple.sleep")
+
+wf2 = Workflow(id=str(_uuid()),
+               name="Waiting workflow",
+               description="this workflow just waits",
+               input=[],
+               output=[],
+               attributes=[],
+               wf_implem="simple.wait")
+
+db.put([wf1, wf2])

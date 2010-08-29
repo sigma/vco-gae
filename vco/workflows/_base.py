@@ -7,3 +7,6 @@ class WorkflowImplementationBase(object):
 
     def initTokens(self, token, inputs):
         pass
+
+    def updateTokens(self, token, inputs):
+        pass

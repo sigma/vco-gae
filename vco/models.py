@@ -104,6 +104,7 @@ class WorkflowToken(TimedItem):
     _COMPLETED = "completed"
     _CANCELLED = "canceled"
     _RUNNING = "running"
+    _WAITING = "waiting"
 
     title = db.StringProperty()
     wf = db.ReferenceProperty(required=True)
@@ -142,6 +143,14 @@ class WorkflowToken(TimedItem):
             key = pname[4:]
             res[key] = val
         return res
+
+    def setRunning(self):
+        self.state = self._RUNNING
+        return self
+
+    def setWaiting(self):
+        self.state = self._WAITING
+        return self
 
     def setCompleted(self):
         self.state = self._COMPLETED
