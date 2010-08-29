@@ -145,6 +145,7 @@ class WorkflowToken(TimedItem):
 
     def setCompleted(self):
         self.state = self._COMPLETED
+        self.end = self.p_time_lower_limit
         self.setFinal()
         return self
 
