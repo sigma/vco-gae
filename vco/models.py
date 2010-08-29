@@ -11,7 +11,6 @@ class Clonable(object):
             for k in self.dynamic_properties():
                 props[k] = self.__getattr__(k)
         props.update(args)
-        logging.debug(">>> %s" % (klass.properties()))
         return klass(**props)
 
 class BaseModel(db.Model, Clonable):
@@ -87,6 +86,12 @@ class TimedItem(BaseExpando):
         return query
 
     @classmethod
+    def allFinal(cls):
+        query = cls.all()
+        query.filter('p_time_upper_limit =', datetime.max)
+        return query
+
+    @classmethod
     def getItem(cls, id):
         now = datetime.now()
         query = cls.allValid()
@@ -103,6 +108,7 @@ class TimedItem(BaseExpando):
 class WorkflowToken(TimedItem):
     _COMPLETED = "completed"
     _CANCELLED = "canceled"
+    _FAILED = "failed"
     _RUNNING = "running"
     _WAITING = "waiting"
 
@@ -146,6 +152,10 @@ class WorkflowToken(TimedItem):
 
     def setRunning(self):
         self.state = self._RUNNING
+        return self
+
+    def setFailed(self):
+        self.state = self._FAILED
         return self
 
     def setWaiting(self):
