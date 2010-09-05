@@ -41,6 +41,12 @@ class Workflow(BaseModel):
 
     wf_implem = db.StringProperty(required=True)
 
+    @classmethod
+    def getById(cls, id):
+        query = cls.all()
+        query.filter('id =', id)
+        return query.get()
+
 class TimedItem(BaseExpando):
     p_time_upper_limit = db.DateTimeProperty(default=datetime.max)
     p_time_lower_limit = db.DateTimeProperty(default=datetime(1900, 1, 1))

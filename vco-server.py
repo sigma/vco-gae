@@ -70,10 +70,9 @@ class VcoService(SOAPApplication):
         return request, response
 
     def __executeWorkflow(self, wf_id, inputs):
-        query = models.Workflow.all()
-        query.filter('id =', wf_id)
-        wf = query.get()
-        token = models.WorkflowToken(id=str(_uuid()),
+        wf = models.Workflow.getById(wf_id)
+        tk_id = str(_uuid())
+        token = models.WorkflowToken(id=tk_id,
                                      wf=wf)
 
         wf = getWorkflowImplementation(wf.wf_implem)
