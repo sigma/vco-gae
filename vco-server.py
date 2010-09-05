@@ -2,19 +2,14 @@ import sys
 sys.path.insert(0, 'zope.zip')
 sys.path.insert(0, 'ZSI.zip')
 
-from uuid import uuid1 as _uuid
 import logging
 from datetime import datetime
 
-from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 import vco.generated.VSOWebControlService_server
-import vco.types as types
-import vco.models as models
-import vco.convert as convert
-from vco.workflows import getWorkflowImplementation
+import vco.data4 as data4
 
 from ZSI.schema import GED
 from ZSI.twisted.wsgi import SOAPApplication, soapmethod, SOAPHandlerChainFactory, WSGIApplication
@@ -44,20 +39,6 @@ class VcoService(SOAPApplication):
         response._echoWorkflowReturn = msg
         return request,response
 
-    def __findWorkflows(self, wf_id=None, wf_name=None):
-        query = models.Workflow.all()
-        if wf_id is not None:
-            query.filter('id =', wf_id)
-            wf = query.get()
-            if wf is not None:
-                wf = convert.convertWorkflow(wf)
-            return wf
-        else:
-            if wf_name is not None:
-                query.filter('name =', wf_name)
-            wfs = [convert.convertWorkflow(wf) for wf in query]
-            return wfs
-
     @_soapmethod('getWorkflowForId')
     def soap_getWorkflowForId(self, request, response, **kw):
         wf_id = request._workflowId
@@ -65,20 +46,9 @@ class VcoService(SOAPApplication):
         pwd = request._password
         logging.debug("[%s/%s] getWorkflowForId: %s" % (user, pwd, wf_id))
 
-        wf = self.__findWorkflows(wf_id=wf_id)
+        wf = data4.Workflow.findById(wf_id)
         response._getWorkflowForIdReturn = wf
         return request, response
-
-    def __executeWorkflow(self, wf_id, inputs):
-        wf = models.Workflow.getById(wf_id)
-        tk_id = str(_uuid())
-        token = models.WorkflowToken(id=tk_id,
-                                     wf=wf)
-
-        wf = getWorkflowImplementation(wf.wf_implem)
-        token.put()
-        wf.initTokens(token, inputs)
-        return convert.convertWorkflowToken(token)
 
     @_soapmethod('executeWorkflow')
     def soap_executeWorkflow(self, request, response, **kw):
@@ -90,7 +60,8 @@ class VcoService(SOAPApplication):
         for i in request._workflowInputs:
             inputs[i._name] = (i._type, i._value)
 
-        response._executeWorkflowReturn = self.__executeWorkflow(wf_id, inputs)
+        wf = data4.Workflow.findById(wf_id)
+        response._executeWorkflowReturn = wf.run(inputs)
         return request, response
 
     @_soapmethod('simpleExecuteWorkflow')
@@ -106,7 +77,8 @@ class VcoService(SOAPApplication):
         for (name, type, value) in zip(input[::3], input[1::3], input[2::3]):
             inputs[name] = (type, value)
 
-        response._simpleExecuteWorkflowReturn = self.__executeWorkflow(wf_id, inputs)
+        wf = data4.Workflow.findById(wf_id)
+        response._simpleExecuteWorkflowReturn = wf.run(inputs)
         return request, response
 
     @_soapmethod('cancelWorkflow')
@@ -116,8 +88,7 @@ class VcoService(SOAPApplication):
         pwd = request._password
         logging.debug("[%s/%s] cancelWorkflow: %s" % (user, pwd, tk_id))
 
-        tk = models.WorkflowToken.getItem(tk_id)
-        tk.cancel().put()
+        data4.WorkflowToken.findById(tk_id).cancel()
 
         return request, response
 
@@ -130,12 +101,7 @@ class VcoService(SOAPApplication):
         for i in request._answerInputs:
             inputs[i._name] = (i._type, i._value)
 
-        token = models.WorkflowToken.getItem(tk_id)
-        if token.state == models.WorkflowToken._WAITING:
-            wf = token.wf
-
-            wf = getWorkflowImplementation(wf.wf_implem)
-            wf.updateTokens(token, inputs)
+        data4.WorkflowToken.findById(tk_id).answer(inputs)
 
         return request, response
 
@@ -145,9 +111,9 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        tks = [models.WorkflowToken.getItem(tk_id) for tk_id in tk_ids]
+        tks = [data4.WorkflowToken.findById(tk_id) for tk_id in tk_ids]
+        response._getWorkflowTokenStatusReturn = [tk._globalState for tk in tks]
 
-        response._getWorkflowTokenStatusReturn = [tk.state for tk in tks]
         return request, response
 
     @_soapmethod('getWorkflowTokenResult')
@@ -156,8 +122,9 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        tk = models.WorkflowToken.getItem(tk_id)
-        response._getWorkflowTokenResultReturn = convert.convertWorkflowTokenResult(tk)
+        token = data4.WorkflowToken.findById(tk_id)
+        response._getWorkflowTokenResultReturn = token.result()
+
         return request, response
 
     @_soapmethod('getWorkflowTokenForId')
@@ -166,8 +133,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        tk = models.WorkflowToken.getItem(tk_id)
-        response._getWorkflowTokenForIdReturn = convert.convertWorkflowToken(tk)
+        response._getWorkflowTokenForIdReturn = data4.WorkflowToken.findById(tk_id)
         return request, response
 
     @_soapmethod('getAllPlugins')
@@ -175,8 +141,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        response._getAllPluginsReturn = [convert.convertPlugin(p)
-                                         for p in list(models.Plugin.all())]
+        response._getAllPluginsReturn = data4.Plugin.findAll()
         return request, response
 
     @_soapmethod('getAllWorkflows')
@@ -184,7 +149,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        wfs = self.__findWorkflows()
+        wfs = data4.Workflow.findAll()
         response._getAllWorkflowsReturn = wfs
         return request, response
 
@@ -195,7 +160,7 @@ class VcoService(SOAPApplication):
         workflowName = request._workflowName
         logging.debug("[%s/%s] getWorkflowsWithName: %s" % (user, pwd, workflowName))
 
-        wfs = self.__findWorkflows(wf_name=workflowName)
+        wfs = data4.Workflow.findByName(workflowName)
         response._getWorkflowsWithNameReturn = wfs
         return request, response
 

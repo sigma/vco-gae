@@ -2,13 +2,14 @@ import logging
 from types import *
 from google.appengine.ext import db
 
-def convertPlugin(plug):
-    p = ModuleInfo()
-    p._moduleName = plug.name
-    p._moduleVersion = plug.version
-    p._moduleDisplayName = plug.display
-    p._moduleDescription = plug.description
-    return p
+def convertPlugin(plug, target=None):
+    if target is None:
+        target = ModuleInfo()
+    target._moduleName = plug.name
+    target._moduleVersion = plug.version
+    target._moduleDisplayName = plug.display
+    target._moduleDescription = plug.description
+    return target
 
 def convertParameter(param):
     param = db.get(param)
@@ -23,28 +24,30 @@ def convertParameters(params):
                 for p in params]
     return ps
 
-def convertWorkflow(wf):
-    w = Workflow()
-    w._id = wf.id
-    w._name = wf.name
-    w._description = wf.description
-    w._inParameters = convertParameters(wf.input)
-    w._outParameters = convertParameters(wf.output)
-    w._attributes = convertParameters(wf.attributes)
-    return w
+def convertWorkflow(wf, target=None):
+    if target is None:
+        target = Workflow()
+    target._id = wf.id
+    target._name = wf.name
+    target._description = wf.description
+    target._inParameters = convertParameters(wf.input)
+    target._outParameters = convertParameters(wf.output)
+    target._attributes = convertParameters(wf.attributes)
+    return target
 
-def convertWorkflowToken(tok):
-    t = WorkflowToken()
-    t._id = tok.id
-    t._title = tok.title
-    t._workflowId = tok.wf.id
-    t._currentItemName = tok.cur_name
-    t._currentItemState = tok.cur_state
-    t._globalState = tok.state
-    t._startDate = "%s" % (tok.start)
-    t._endDate = "%s" % (tok.end)
-    t._xmlContent = tok.xml
-    return t
+def convertWorkflowToken(tok, target=None):
+    if target is None:
+        target = WorkflowToken()
+    target._id = tok.id
+    target._title = tok.title
+    target._workflowId = tok.wf.id
+    target._currentItemName = tok.cur_name
+    target._currentItemState = tok.cur_state
+    target._globalState = tok.state
+    target._startDate = "%s" % (tok.start)
+    target._endDate = "%s" % (tok.end)
+    target._xmlContent = tok.xml
+    return target
 
 def convertWorkflowTokenResult(tok):
     res = []
