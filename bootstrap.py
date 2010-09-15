@@ -1,6 +1,6 @@
 # Run this in admin console to populate the datastore
 
-from vco.models import Plugin, Workflow, Parameter, WorkflowToken
+from vco.models import Plugin, Workflow, Parameter, WorkflowToken, PluginObject
 from uuid import uuid1 as _uuid
 
 from google.appengine.ext import db
@@ -13,6 +13,7 @@ _cleanup(Plugin)
 _cleanup(Parameter)
 _cleanup(Workflow)
 _cleanup(WorkflowToken)
+_cleanup(PluginObject)
 
 # Create plug-ins
 p = Plugin(name="dummy", version="0.1",
@@ -41,3 +42,13 @@ wf2 = Workflow(id=str(_uuid()),
                wf_implem="simple.wait")
 
 db.put([wf1, wf2])
+
+# Create plugin objects
+
+obj = PluginObject(id=str(_uuid()),
+                   plugin=p,
+                   type="Foo",
+                   obj_id="foo")
+obj.setProperties(isTrue='false', name='toto')
+
+db.put(obj)

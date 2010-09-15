@@ -13,7 +13,7 @@ class Sleep(WorkflowImplementationBase):
         running, completed = token.split(end)
 
         completed.setCompleted()
-        completed.setResults({'out': inputs['in'][1]})
+        completed.setResults(out=inputs['in'][1])
 
         db.put([running,completed])
 
@@ -42,6 +42,6 @@ class Wait(WorkflowImplementationBase):
         running.setRunning()
 
         completed.setCompleted()
-        completed.setResults({})
+        completed.setResults()
 
         db.put([running, completed])

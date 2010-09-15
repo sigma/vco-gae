@@ -17,7 +17,29 @@ class BaseModel(db.Model, Clonable):
     pass
 
 class BaseExpando(db.Expando, Clonable):
-    pass
+    p_props = db.StringListProperty()
+
+    def setProperties(self, **props):
+        self.clearProperties()
+        l = []
+        for k,v in props.items():
+            pname = "prop_%s" % (k)
+            self.__setattr__(pname, v)
+            l.append(pname)
+        self.p_props = l
+
+    def clearProperties(self):
+        for pname in self.p_props:
+            self.__delattr__(pname)
+        self.p_props = []
+
+    def getProperties(self):
+        res = {}
+        for pname in self.p_props:
+            val = getattr(self, pname)
+            key = pname[5:]
+            res[key] = val
+        return res
 
 class Plugin(BaseModel):
 
@@ -135,31 +157,20 @@ class WorkflowToken(TimedItem):
 
     xml = db.StringProperty()
 
-    p_results = db.StringListProperty()
-
-    def setResults(self, res):
+    def setResults(self, **res):
         self.clearResults()
-        l = []
+        props = {}
         for out in self.wf.output:
             out = db.get(out)
             name = out.name
-            pname = "res_%s" % (name)
-            self.__setattr__(pname, res.get(name))
-            l.append(pname)
-        self.p_results = l
+            props[name] = res.get(name)
+        return self.setProperties(**props)
 
     def clearResults(self):
-        for pname in self.p_results:
-            self.__delattr__(pname)
-        self.p_results = []
+        return self.clearProperties()
 
     def getResults(self):
-        res = {}
-        for pname in self.p_results:
-            val = getattr(self, pname)
-            key = pname[4:]
-            res[key] = val
-        return res
+        return self.getProperties()
 
     def setRunning(self):
         self.state = self._RUNNING
@@ -195,3 +206,8 @@ class WorkflowToken(TimedItem):
             return self.setCancelled()
         else:
             return self
+
+class PluginObject(TimedItem):
+    plugin = db.ReferenceProperty()
+    type = db.StringProperty()
+    obj_id = db.StringProperty()

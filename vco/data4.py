@@ -7,6 +7,7 @@ import types
 import models
 import convert
 import logging
+from datetime import datetime
 
 class _Item(object):
     _model = None
@@ -21,7 +22,12 @@ class _Item(object):
             else:
                 query = cls._model.all()
             elems = [x for x in query]
-            memcache.add(uri, elems)
+
+            if len(elems) != 0 and issubclass(cls._model, models.TimedItem):
+                ttl = elems[0].ttl()
+            else:
+                ttl = 0
+            memcache.add(uri, elems, ttl)
 
         items = [cls(i) for i in elems]
         return items
@@ -112,3 +118,39 @@ class WorkflowToken(types.WorkflowToken, _IdItem):
 
     def result(self):
         return convert.convertWorkflowTokenResult(self.__model)
+
+class FinderResult(types.FinderResult, _IdItem):
+    _model = models.PluginObject
+
+    def __init__(self, model):
+        types.FinderResult.__init__(self)
+        self.__model = model
+
+        convert.convertPluginObject(model, target=self)
+
+    @classmethod
+    def find(cls, type, id=None, query=None, _query_result=False):
+        uri = "data4://finder/%s/%s/%s" % (type, id, query)
+        plugin, type = type.split(':')
+        plugin = models.Plugin.all().filter('name =', plugin).get()
+        elems = memcache.get(uri)
+        if elems is None:
+            query = cls._model.allValid()
+            query.filter('plugin =', plugin)
+            query.filter('type =', type)
+            if id is not None:
+                query.filter('obj_id =', id)
+            elems = [x for x in query]
+
+            if len(elems) != 0:
+                now = datetime.now()
+                ttl = elems[0].ttl()
+            else:
+                ttl = 0
+            memcache.add(uri, elems, ttl)
+
+        items = [cls(i) for i in elems]
+        if _query_result:
+            return convert.convertQueryResult(items)
+        else:
+            return items

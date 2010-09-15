@@ -10,6 +10,19 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: PluginObject
+  properties:
+  - name: obj_id
+  - name: plugin
+  - name: type
+  - name: p_time_upper_limit
+
+- kind: PluginObject
+  properties:
+  - name: plugin
+  - name: type
+  - name: p_time_upper_limit
+
 - kind: WorkflowToken
   properties:
   - name: id

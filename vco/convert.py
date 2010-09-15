@@ -61,3 +61,31 @@ def convertWorkflowTokenResult(tok):
         attr._value = results.get(attr._name, "")
         res.append(attr)
     return res
+
+def convertPluginObject(obj, target=None):
+    if target is None:
+        target = FinderResult()
+    target._type = "%s:%s" % (obj.plugin.name, obj.type)
+    target._id = obj.obj_id
+    target._dunesUri = "dunes://service.dunes.ch/CustomSDKObject?id='%s'&dunesName='%s'" % (target._id, target._type)
+
+    _props = ArrayOfProperty()
+    properties = obj.getProperties()
+
+    items = []
+    for k,v in properties.items():
+        p = Property()
+        p._name = k
+        p._value = v
+        items.append(p)
+    _props._item = items
+    target._properties = _props
+    return target
+
+def convertQueryResult(items):
+    target = QueryResult()
+    target._totalCount = len(items)
+    _res = ArrayOfFinderResult()
+    _res._item = items
+    target._elements = _res
+    return target

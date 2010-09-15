@@ -175,7 +175,6 @@ class VcoService(SOAPApplication):
     def soap_sendCustomEvent(self, request, response, **kw):
         return request, response
 
-    # TODO: complete implem
     @_soapmethod('findForId')
     def soap_findForId(self, request, response, **kw):
         type = request._type
@@ -183,7 +182,13 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        response._findForIdReturn = None
+        objs = data4.FinderResult.find(id=id, type=type)
+        if len(objs) == 0:
+            obj = None
+        else:
+            obj = objs[0]
+
+        response._findForIdReturn = obj
         return request, response
 
     # TODO: complete implem
@@ -210,17 +215,16 @@ class VcoService(SOAPApplication):
         response._hasChildrenRelationReturn = False
         return request, response
 
-    # TODO: complete implem
     @_soapmethod('find')
     def soap_find(self, request, response, **kw):
-        type = request._parentType
-        id = request._parentId
-        relation = request._relationName
+        type = request._type
+        query = request._query
         user = request._username
         pwd = request._password
 
-        response._findReturn = []
-        return response
+        objs = data4.FinderResult.find(type=type, query=query, _query_result=True)
+        response._findReturn = objs
+        return request, response
 
 application = WSGIApplication()
 application['webservice'] = VcoService()
