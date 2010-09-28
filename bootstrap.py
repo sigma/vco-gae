@@ -25,7 +25,7 @@ i = Parameter(name="in", type="string")
 o = Parameter(name="out", type="string")
 db.put([i,o])
 
-wf1 = Workflow(id=str(_uuid()),
+wf1 = Workflow(id='94db6b5e-cabf-11df-9ffb-002618405f6e',
                name="Dummy workflow",
                description="this workflow just does nothing",
                input = [i.key()],
@@ -33,7 +33,7 @@ wf1 = Workflow(id=str(_uuid()),
                attributes=[],
                wf_implem="simple.sleep")
 
-wf2 = Workflow(id=str(_uuid()),
+wf2 = Workflow(id='a29f742e-cabf-11df-9ffb-002618405f6e'),
                name="Waiting workflow",
                description="this workflow just waits",
                input=[],
@@ -45,7 +45,7 @@ db.put([wf1, wf2])
 
 # Create plugin objects
 
-obj = PluginObject(id=str(_uuid()),
+obj = PluginObject(id='b2c93eca-cabf-11df-9ffb-002618405f6e'),
                    plugin=p,
                    type="Foo",
                    obj_id="foo")
