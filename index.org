@@ -1,7 +1,7 @@
 #+STARTUP: content
 #+STARTUP: hidestars
 #+STARTUP: odd
-#+STYLE: <link rel="stylesheet" type="text/css" href="org.css" />
+#+STYLE: <link rel="stylesheet" type="text/css" href="css/org.css" />
 #+TITLE: vCO Simulator
 * Introduction
   The goal of this site is to provide a reference point for developing client
