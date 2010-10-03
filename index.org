@@ -4,9 +4,9 @@
 #+STYLE: <link rel="stylesheet" type="text/css" href="css/org.css" />
 #+TITLE: vCO Simulator
 * Introduction
-  The goal of this site is to provide a reference point for developing client
-  software for the [[http://www.vmware.com/products/vcenter-orchestrator/][VMware vCenter Orchestrator]], and more precisely for its SOAP
-  WebService. This site provides:
+  The goal of this application is to provide a reference point for developing
+  client software for the [[http://www.vmware.com/products/vcenter-orchestrator/][VMware vCenter Orchestrator]], and more precisely for
+  its SOAP WebService. This site provides:
   - a public reference implementation against which client code can be tested.
   - code examples explaining the various behaviors.
 
@@ -37,8 +37,8 @@
   |------------------------+--------+----------+------------------------------+----------|
 
   For now, this vCO simulator is mainly tested using the [[http://gitorious.org/pyvco][PyvCO]] client library
-  (from the same developer), so this one might be the easiest starting point
-  for running examples.
+  (since they share the same developer), so this one might be the easiest
+  starting point for running examples.
 * Simulator versions
   Currently there is only one version of this simulator, which mimics the
   behavior of vCO 4.1. In the future, there might be more versions available,
