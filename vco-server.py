@@ -1,6 +1,6 @@
 import sys
-sys.path.insert(0, 'zope.zip')
-sys.path.insert(0, 'ZSI.zip')
+sys.path.insert(0, 'zope.egg')
+sys.path.insert(0, 'ZSI.egg')
 
 import logging
 from datetime import datetime
