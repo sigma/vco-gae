@@ -218,4 +218,4 @@ man_pages = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'python': ('http://docs.python.org/', None),
-                       'pyvco': ('http://sigma.github.com/pyvco', None)}
+                       'pyvco': ('http://sigma.github.com/vmw.vco', None)}

@@ -51,7 +51,7 @@ notify me of publicly available libraries that are missing.
 +========================+========+==========+==============================+==================================+
 | Official Java bindings | VMware | Java     | VMware Technological Preview | TODO                             |
 +------------------------+--------+----------+------------------------------+----------------------------------+
-| PyvCO                  | VMware | Python   | MIT                          | :ref:`examples <pyvco:examples>` |
+| vmw.vco                | VMware | Python   | MIT                          | :ref:`examples <pyvco:examples>` |
 +------------------------+--------+----------+------------------------------+----------------------------------+
 
 For now, this vCO simulator is mainly tested using the `PyvCO
