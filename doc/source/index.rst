@@ -54,8 +54,8 @@ notify me of publicly available libraries that are missing.
 | vmw.vco                | VMware | Python   | MIT                          | :ref:`examples <pyvco:examples>` |
 +------------------------+--------+----------+------------------------------+----------------------------------+
 
-For now, this vCO simulator is mainly tested using the `PyvCO
-<http://gitorious.org/pyvco>`_ client library (since they share the same
+For now, this vCO simulator is mainly tested using the `vmw.vco
+<http://sigma.github.com/vmw.vco>`_ client library (since they share the same
 developer), so this one might be the easiest starting point for
 running examples.
 
