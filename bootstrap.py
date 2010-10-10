@@ -4,6 +4,7 @@ from vco.models import Plugin, Workflow, Parameter, WorkflowToken, PluginObject
 from uuid import uuid1 as _uuid
 
 from google.appengine.ext import db
+from google.appengine.api import memcache
 
 # Cleanup everything
 def _cleanup(kind):
@@ -14,6 +15,8 @@ _cleanup(Parameter)
 _cleanup(Workflow)
 _cleanup(WorkflowToken)
 _cleanup(PluginObject)
+
+memcache.flush_all()
 
 # Create plug-ins
 p = Plugin(name="dummy", version="0.1",

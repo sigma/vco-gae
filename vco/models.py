@@ -162,7 +162,7 @@ class WorkflowToken(TimedItem):
         props = {}
         for out in self.wf.output:
             out = db.get(out)
-            name = out.name
+            name = str(out.name)
             props[name] = res.get(name)
         return self.setProperties(**props)
 

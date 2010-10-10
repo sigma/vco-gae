@@ -27,7 +27,7 @@ class _Item(object):
                 ttl = elems[0].ttl()
             else:
                 ttl = 0
-            memcache.add(uri, elems, ttl)
+            #memcache.add(uri, elems, ttl)
 
         items = [cls(i) for i in elems]
         return items
@@ -43,12 +43,12 @@ class _IdItem(_Item):
             if issubclass(cls._model, models.TimedItem):
                 item = cls._model.getItem(id)
                 ttl = item.ttl()
-                memcache.add(uri, item, ttl)
+                #memcache.add(uri, item, ttl)
             else:
                 query = cls._model.all()
                 query.filter('id =', id)
                 item = query.get()
-                memcache.add(uri, item)
+                #memcache.add(uri, item)
 
         if item is not None:
             item = cls(item)
@@ -74,7 +74,7 @@ class Workflow(types.Workflow, _IdItem):
             query = cls._model.all()
             query.filter('name =', name)
             elems = [x for x in query]
-            memcache.add(uri, elems)
+            #memcache.add(uri, elems)
 
         items = [cls(i) for i in elems]
         return items
@@ -147,7 +147,7 @@ class FinderResult(types.FinderResult, _IdItem):
                 ttl = elems[0].ttl()
             else:
                 ttl = 0
-            memcache.add(uri, elems, ttl)
+            #memcache.add(uri, elems, ttl)
 
         items = [cls(i) for i in elems]
         if _query_result:
