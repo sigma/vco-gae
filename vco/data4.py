@@ -24,7 +24,7 @@ class _Item(object):
         return "data4://all/%s" % (cls.__name__)
 
     @classmethod
-    def findAll(cls):
+    def findAll(cls, as_soap=False):
         uri = cls.findAllUri()
         elems = memcache.get(uri)
         if elems is None:
@@ -42,17 +42,22 @@ class _Item(object):
             elems = [cls(i) for i in elems]
             memcache.add(uri, elems, ttl)
 
-        items = [i._asTarget() for i in elems]
-        return items
+        if as_soap:
+            elems = [e._asTarget() for e in elems]
+        return elems
 
 class _IdItem(_Item):
+
+    @property
+    def _id(self):
+        return self._json.get('id', None)
 
     @classmethod
     def findByIdUri(cls, id):
         return "data4://id/%s/%s" % (cls.__name__, id)
 
     @classmethod
-    def findById(cls, id):
+    def findById(cls, id, as_soap=False):
         uri = cls.findByIdUri(id)
         item = memcache.get(uri)
 
@@ -69,7 +74,8 @@ class _IdItem(_Item):
                 item = cls(item)
                 memcache.add(uri, item)
 
-        item = item._asTarget()
+        if as_soap:
+            item = item._asTarget()
         return item
 
 class Plugin(_Item):
@@ -79,7 +85,7 @@ class Plugin(_Item):
     def __init__(self, model):
         _Item.__init__(self, model)
 
-class Workflow(types.Workflow, _IdItem):
+class Workflow(_IdItem):
     _model = models.Workflow
     _converter = convert.WorkflowConverter
 
@@ -88,7 +94,7 @@ class Workflow(types.Workflow, _IdItem):
         return "data4://id/%s/%s" % (cls.__name__, name)
 
     @classmethod
-    def findByName(cls, name):
+    def findByName(cls, name, as_soap=False):
         uri = cls.findByNameUri(name)
         elems = memcache.get(uri)
         if elems is None:
@@ -98,14 +104,15 @@ class Workflow(types.Workflow, _IdItem):
             elems = [cls(i) for i in elems]
             memcache.add(uri, elems)
 
-        items = [e._asTarget() for e in elems]
-        return items
+        if as_soap:
+            elems = [e._asTarget() for e in elems]
+        return elems
 
     def __init__(self, model):
         _IdItem.__init__(self, model)
 
     def run(self, inputs):
-        wf = self.findById(self._id)
+        wf = self._model.getById(self._id)
         tk_id = str(_uuid())
         token = models.WorkflowToken(id=tk_id,
                                      wf=wf)
@@ -113,7 +120,7 @@ class Workflow(types.Workflow, _IdItem):
         wf = getWorkflowImplementation(wf.wf_implem)
         token.put()
         wf.initTokens(token, inputs)
-        return WorkflowToken(token)
+        return WorkflowToken(token)._asTarget()
 
 class WorkflowToken(_IdItem):
     _model = models.WorkflowToken
@@ -123,10 +130,10 @@ class WorkflowToken(_IdItem):
         _IdItem.__init__(self, model)
 
     def cancel(self):
-        self.findById(self._id).cancel().put()
+        self._model.getItem(self._id).cancel().put()
 
     def answer(self, inputs):
-        token = self.findById(self._id)
+        token = self._model.getItem(self._id)
         if token.state == models.WorkflowToken._WAITING:
             wf = token.wf
 
@@ -134,7 +141,7 @@ class WorkflowToken(_IdItem):
             wf.updateTokens(token, inputs)
 
     def result(self):
-        return convert.convertWorkflowTokenResult(self.findById(self._id))
+        return convert.convertWorkflowTokenResult(self._model.getItem(self._id))
 
 class FinderResult(_IdItem):
     _model = models.PluginObject

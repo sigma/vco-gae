@@ -98,7 +98,8 @@ class WorkflowTokenConverter(object):
         soap._currentItemState = json['cur_state']
         soap._globalState = json['state']
         soap._startDate = "%s" % (json['start'])
-        soap._endDate = "%s" % (json['end'])
+        if json['end'] is not None:
+            soap._endDate = "%s" % (json['end'])
         soap._xmlContent = json['xml']
         return soap
 

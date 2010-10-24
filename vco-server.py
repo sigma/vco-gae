@@ -45,7 +45,7 @@ class VcoService(SOAPApplication):
         pwd = request._password
         logging.debug("[%s/%s] getWorkflowForId: %s" % (user, pwd, wf_id))
 
-        wf = data4.Workflow.findById(wf_id)
+        wf = data4.Workflow.findById(wf_id, as_soap=True)
         response._getWorkflowForIdReturn = wf
         return request, response
 
@@ -110,7 +110,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        tks = [data4.WorkflowToken.findById(tk_id) for tk_id in tk_ids]
+        tks = [data4.WorkflowToken.findById(tk_id, as_soap=True) for tk_id in tk_ids]
         response._getWorkflowTokenStatusReturn = [tk._globalState for tk in tks]
 
         return request, response
@@ -132,7 +132,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        response._getWorkflowTokenForIdReturn = data4.WorkflowToken.findById(tk_id)
+        response._getWorkflowTokenForIdReturn = data4.WorkflowToken.findById(tk_id, as_soap=True)
         return request, response
 
     @_soapmethod('getAllPlugins')
@@ -140,7 +140,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        response._getAllPluginsReturn = data4.Plugin.findAll()
+        response._getAllPluginsReturn = data4.Plugin.findAll(as_soap=True)
         return request, response
 
     @_soapmethod('getAllWorkflows')
@@ -148,7 +148,7 @@ class VcoService(SOAPApplication):
         user = request._username
         pwd = request._password
 
-        wfs = data4.Workflow.findAll()
+        wfs = data4.Workflow.findAll(as_soap=True)
         response._getAllWorkflowsReturn = wfs
         return request, response
 
@@ -159,7 +159,7 @@ class VcoService(SOAPApplication):
         workflowName = request._workflowName
         logging.debug("[%s/%s] getWorkflowsWithName: %s" % (user, pwd, workflowName))
 
-        wfs = data4.Workflow.findByName(workflowName)
+        wfs = data4.Workflow.findByName(workflowName, as_soap=True)
         response._getWorkflowsWithNameReturn = wfs
         return request, response
 
