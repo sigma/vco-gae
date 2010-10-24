@@ -1,5 +1,5 @@
 from generated.VSOWebControlService_types import *
-from ZSI.schema import GTD
+from vmw.ZSI.schema import GTD
 
 __schema = "http://webservice.vso.dunes.ch"
 

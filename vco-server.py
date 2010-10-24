@@ -1,6 +1,5 @@
 import sys
 sys.path.insert(0, 'zope.egg')
-sys.path.insert(0, 'ZSI.egg')
 
 import logging
 from datetime import datetime
@@ -11,8 +10,8 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 import vco.generated.VSOWebControlService_server
 import vco.data4 as data4
 
-from ZSI.schema import GED
-from ZSI.twisted.wsgi import SOAPApplication, soapmethod, SOAPHandlerChainFactory, WSGIApplication
+from vmw.ZSI.schema import GED
+from vmw.ZSI.twisted.wsgi import SOAPApplication, soapmethod, SOAPHandlerChainFactory, WSGIApplication
 
 def _soapmethod(op):
     op_request = GED("http://webservice.vso.dunes.ch", op).pyclass

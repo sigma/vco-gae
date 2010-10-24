@@ -1,5 +1,5 @@
 application: vco-gae
-version: 1
+version: 4-1-test
 runtime: python
 api_version: 1
 
@@ -18,10 +18,13 @@ handlers:
 - url: /vmware-vmo-webcontrol/.*
   script: vco-server.py
 
-- url: /remote_api
-  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin
-
 - url: /tasks/.*
   script: vco-tasks.py
   login: admin
+
+builtins:
+- datastore_admin: on
+
+- appstats: on
+
+- remote_api: on
