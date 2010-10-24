@@ -24,6 +24,11 @@ class _Item(object):
         return "data4://all/%s" % (cls.__name__)
 
     @classmethod
+    def findAllResetCache(cls):
+        uri = cls.findAllUri()
+        memcache.delete(uri)
+
+    @classmethod
     def findAll(cls, as_soap=False):
         uri = cls.findAllUri()
         elems = memcache.get(uri)
@@ -55,6 +60,11 @@ class _IdItem(_Item):
     @classmethod
     def findByIdUri(cls, id):
         return "data4://id/%s/%s" % (cls.__name__, id)
+
+    @classmethod
+    def findByIdResetCache(cls, id):
+        uri = cls.findByIdUri(id)
+        memcache.delete(uri)
 
     @classmethod
     def findById(cls, id, as_soap=False):
@@ -129,8 +139,13 @@ class WorkflowToken(_IdItem):
     def __init__(self, model):
         _IdItem.__init__(self, model)
 
+    def invalidate(self):
+        self.findAllResetCache()
+        self.findByIdResetCache(self._id)
+
     def cancel(self):
         self._model.getItem(self._id).cancel().put()
+        self.invalidate()
 
     def answer(self, inputs):
         token = self._model.getItem(self._id)
@@ -139,6 +154,7 @@ class WorkflowToken(_IdItem):
 
             wf = getWorkflowImplementation(wf.wf_implem)
             wf.updateTokens(token, inputs)
+            self.invalidate()
 
     def result(self):
         return convert.convertWorkflowTokenResult(self._model.getItem(self._id))
