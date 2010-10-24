@@ -108,7 +108,7 @@ class TimedItem(BaseExpando):
     def ttl(self):
         now = datetime.now()
         ttl = self.p_time_upper_limit - now
-        return ttl.days * 86400 + ttl.seconds + 1
+        return min(ttl.days * 86400 + ttl.seconds + 1, (1L<<32) - 1)
 
     @classmethod
     def allValid(cls, keys_only=False):
